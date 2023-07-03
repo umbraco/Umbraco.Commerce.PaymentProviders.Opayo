@@ -7,7 +7,7 @@
     <Product>Umbraco Commerce Opayo Payment Provider</Product>
     <PackageProjectUrl>https://github.com/umbraco/Umbraco.Commerce.PaymentProviders.Opayo</PackageProjectUrl>
     <PackageIcon>logo-128.png</PackageIcon>
-    <PackageTags>umbraco commerce opayo</PackageTags>
+    <PackageTags>umbraco commerce opayo umbraco-marketplace</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <NeutralLanguage>en-US</NeutralLanguage>
