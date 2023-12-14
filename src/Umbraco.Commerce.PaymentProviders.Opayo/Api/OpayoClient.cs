@@ -118,7 +118,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                     .SetQueryParams(inputFields, Flurl.NullValueHandling.Remove);
 
                 return await request
-                    .PostAsync(null, cancellationToken)
+                    .PostAsync(null, cancellationToken: cancellationToken)
                     .ReceiveString().ConfigureAwait(false);
             }
             catch (FlurlHttpException ex)
