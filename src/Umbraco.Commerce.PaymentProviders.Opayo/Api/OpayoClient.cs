@@ -12,6 +12,8 @@ using Umbraco.Commerce.Core.PaymentProviders;
 using Umbraco.Commerce.Extensions;
 using System.Threading.Tasks;
 using System.Threading;
+using Flurl.Http.Newtonsoft;
+using Newtonsoft.Json;
 
 namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
 {
@@ -115,6 +117,10 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                 }
 
                 var request = new FlurlRequest(url)
+                    .WithSettings(x => x.JsonSerializer = new NewtonsoftJsonSerializer(new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    }))
                     .SetQueryParams(inputFields, Flurl.NullValueHandling.Remove);
 
                 return await request
