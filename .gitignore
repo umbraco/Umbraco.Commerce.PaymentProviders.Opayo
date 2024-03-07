@@ -479,3 +479,4 @@ $RECYCLE.BIN/
 ##
 ## Umbraco Commerce specific
 ##
+src/Umbraco.Commerce.PaymentProviders.Opayo/packages.lock.json
