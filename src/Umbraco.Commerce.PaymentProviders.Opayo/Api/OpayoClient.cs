@@ -1,17 +1,17 @@
-using Flurl.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
-using Umbraco.Commerce.PaymentProviders.Opayo.Api.Models;
+using Flurl.Http;
 using Umbraco.Commerce.Common.Logging;
 using Umbraco.Commerce.Core.Models;
 using Umbraco.Commerce.Core.PaymentProviders;
 using Umbraco.Commerce.Extensions;
-using System.Threading.Tasks;
-using System.Threading;
+using Umbraco.Commerce.PaymentProviders.Opayo.Api.Models;
 
 namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
 {
@@ -29,7 +29,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         public async Task<Dictionary<string, string>> InitiateTransactionAsync(bool useTestMode, Dictionary<string, string> inputFields, CancellationToken cancellationToken = default)
         {
             var rawResponse = await MakePostRequestAsync(
-                GetMethodUrl(inputFields[OpayoConstants.TransactionRequestFields.TransactionType], useTestMode),
+                OpayoEndpoints.Get(inputFields[OpayoConstants.TransactionRequestFields.TransactionType], useTestMode),
                 inputFields,
                 cancellationToken)
                 .ConfigureAwait(false);
@@ -60,45 +60,6 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                 default:
                     return CallbackResult.Empty;
             }
-        }
-
-        private string GetMethodUrl(string type, bool testMode)
-        {
-            switch (testMode)
-            {
-                case false:
-                    switch (type.ToUpperInvariant())
-                    {
-                        case "AUTHORISE":
-                            return "https://live.sagepay.com/gateway/service/authorise.vsp";
-                        case "PAYMENT":
-                        case "DEFERRED":
-                        case "AUTHENTICATE":
-                            return "https://live.sagepay.com/gateway/service/vspserver-register.vsp";
-                        case "CANCEL":
-                            return "https://live.sagepay.com/gateway/service/cancel.vsp";
-                        case "REFUND":
-                            return "https://live.sagepay.com/gateway/service/refund.vsp";
-                    }
-                    break;
-                case true:
-                    switch (type.ToUpperInvariant())
-                    {
-                        case "AUTHORISE":
-                            return "https://test.sagepay.com/gateway/service/authorise.vsp";
-                        case "PAYMENT":
-                        case "DEFERRED":
-                        case "AUTHENTICATE":
-                            return "https://test.sagepay.com/gateway/service/vspserver-register.vsp";
-                        case "CANCEL":
-                            return "https://test.sagepay.com/gateway/service/cancel.vsp";
-                        case "REFUND":
-                            return "https://test.sagepay.com/gateway/service/refund.vsp";
-                    }
-                    break;
-            }
-
-            return string.Empty;
         }
 
         private async Task<string> MakePostRequestAsync(string url, IDictionary<string, string> inputFields, CancellationToken cancellationToken = default)
@@ -172,11 +133,11 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         private CallbackResult GenerateAuthenticatedCallbackResponse(OrderReadOnly order, CallbackRequestModel request, OpayoSettings settings)
         {
             _logger.Warn("Payment transaction Authenticated:\n\tOpayoTx: {VPSTxId}", request.VPSTxId);
-            
+
             var validSig = ValidateVpsSigniture(order, request, settings);
 
             return new CallbackResult
-            {                
+            {
                 HttpResponse = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
                 {
                     Content = validSig
@@ -196,7 +157,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         private CallbackResult GenerateNotAuthorisedCallbackResponse(OrderReadOnly order, CallbackRequestModel request, OpayoSettings settings)
         {
             _logger.Warn("Payment transaction not authorised:\n\tOpayoTx: {VPSTxId}", request.VPSTxId);
-            
+
             var validSig = ValidateVpsSigniture(order, request, settings);
 
             return new CallbackResult
@@ -229,7 +190,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         private CallbackResult GeneratePendingCallbackResponse(OrderReadOnly order, CallbackRequestModel request, OpayoSettings settings)
         {
             _logger.Warn("Payment transaction pending:\n\tOpayoTx: {VPSTxId}", request.VPSTxId);
-            
+
             var validSig = ValidateVpsSigniture(order, request, settings);
 
             return new CallbackResult
@@ -255,7 +216,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         private CallbackResult GenerateAbortedCallbackResponse(OrderReadOnly order, CallbackRequestModel request, OpayoSettings settings)
         {
             _logger.Warn("Payment transaction aborted:\n\tOpayoTx: {VPSTxId}\n\tDetail: {StatusDetail}", request.VPSTxId, request.StatusDetail);
-            
+
             var validSig = ValidateVpsSigniture(order, request, settings);
 
             return new CallbackResult
@@ -272,7 +233,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         private CallbackResult GenerateRejectedCallbackResponse(OrderReadOnly order, CallbackRequestModel request, OpayoSettings settings)
         {
             _logger.Warn("Payment transaction rejected:\n\tOpayoTx: {VPSTxId}\n\tDetail: {StatusDetail}", request.VPSTxId, request.StatusDetail);
-            
+
             var validSig = ValidateVpsSigniture(order, request, settings);
 
             return new CallbackResult
@@ -289,7 +250,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         private CallbackResult GenerateErrorCallbackResponse(OrderReadOnly order, CallbackRequestModel request, OpayoSettings settings)
         {
             _logger.Warn("Payment transaction error:\n\tOpayoTx: {VPSTxId}\n\tDetail: {StatusDetail}", request.VPSTxId, request.StatusDetail);
-            
+
             var validSig = ValidateVpsSigniture(order, request, settings);
 
             return new CallbackResult
