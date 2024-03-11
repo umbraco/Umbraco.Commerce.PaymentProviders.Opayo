@@ -31,7 +31,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         public async Task<Dictionary<string, string>> InitiateTransactionAsync(bool useTestMode, Dictionary<string, string> inputFields, CancellationToken cancellationToken = default)
         {
             var rawResponse = await MakePostRequestAsync(
-                GetMethodUrl(inputFields[OpayoConstants.TransactionRequestFields.TransactionType], useTestMode),
+                OpayoEndpoints.Get(inputFields[OpayoConstants.TransactionRequestFields.TransactionType], useTestMode),
                 inputFields,
                 cancellationToken)
                 .ConfigureAwait(false);
@@ -62,16 +62,6 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                 default:
                     return CallbackResult.Empty;
             }
-        }
-
-        private static string GetMethodUrl(string type, bool testMode)
-        {
-            if (testMode)
-            {
-                return OpayoEndpoints.TestEndpoints[type.ToUpperInvariant()];
-            }
-
-            return OpayoEndpoints.LiveEndpoints[type.ToUpperInvariant()];
         }
 
         private async Task<string> MakePostRequestAsync(string url, IDictionary<string, string> inputFields, CancellationToken cancellationToken = default)
