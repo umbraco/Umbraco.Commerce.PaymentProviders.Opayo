@@ -1,13 +1,12 @@
 using System;
 using System.Globalization;
-using System.Text;
 
 namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
 {
     [Serializable]
     public class UnknownEndpointTypeException : Exception
     {
-        private static readonly CompositeFormat _messageTemplate = CompositeFormat.Parse("Unknown endpoint type '{0}'");
+        private const string MessageTemplate = "Unknown endpoint type '{0}'";
 
         public UnknownEndpointTypeException()
             : base("Unknown endpoint type")
@@ -15,7 +14,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         }
 
         public UnknownEndpointTypeException(string endpointType)
-            : base(string.Format(CultureInfo.InvariantCulture, _messageTemplate, endpointType))
+            : base(string.Format(CultureInfo.InvariantCulture, MessageTemplate, endpointType))
         {
         }
 
