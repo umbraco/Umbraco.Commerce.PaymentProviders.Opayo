@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Umbraco.Commerce.Core.Api;
 using Umbraco.Commerce.Core.PaymentProviders;
 using Umbraco.Commerce.PaymentProviders.Opayo.Api;
@@ -58,7 +59,10 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             });
 
             var inputFields = OpayoInputLoader.LoadInputs(ctx.Order, ctx.Settings, Context, ctx.Urls.CallbackUrl);
+            _logger.Info($"Opayo ({ctx.Order.OrderNumber}) request: {JsonSerializer.Serialize(inputFields)}");
+
             var responseDetails = await client.InitiateTransactionAsync(ctx.Settings.TestMode, inputFields, cancellationToken).ConfigureAwait(false);
+            _logger.Info($"Opayo ({ctx.Order.OrderNumber}) response: {JsonSerializer.Serialize(responseDetails)}");
 
             var status = responseDetails[OpayoConstants.Response.Status];
 
@@ -90,7 +94,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         {
             var callbackRequestModel = await CallbackRequestModel.FromRequestAsync(ctx.Request).ConfigureAwait(false);
             var client = new OpayoServerClient(
-                _logger, 
+                _logger,
                 new OpayoServerClientConfig {
                     ProviderAlias = Alias,
                     ContinueUrl = ctx.Urls.ContinueUrl,
