@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace Umbraco.Commerce.PaymentProviders.Opayo
 {
-    [PaymentProvider("opayo-server", "Opayo Server", "Opayo Server payment provider", Icon = "icon-credit-card")]
+    [PaymentProvider("opayo-server", Icon = "icon-credit-card")]
     public class OpayoServerPaymentProvider : PaymentProviderBase<OpayoSettings>
     {
         private readonly ILogger<OpayoServerPaymentProvider> _logger;
@@ -88,7 +88,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
 
         public override async Task<CallbackResult> ProcessCallbackAsync(PaymentProviderContext<OpayoSettings> ctx, CancellationToken cancellationToken = default)
         {
-            var callbackRequestModel = await CallbackRequestModel.FromRequestAsync(ctx.Request).ConfigureAwait(false);
+            var callbackRequestModel = await CallbackRequestModel.FromRequestAsync(ctx.HttpContext.Request).ConfigureAwait(false);
             var client = new OpayoServerClient(
                 _logger, 
                 new OpayoServerClientConfig {

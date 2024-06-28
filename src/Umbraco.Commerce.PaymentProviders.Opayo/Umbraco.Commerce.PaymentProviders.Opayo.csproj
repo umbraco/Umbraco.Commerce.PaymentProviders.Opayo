@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
       <Title>Umbraco Commerce Opayo Payment Provider</Title>
       <Description>Opayo payment provider for Umbraco Commerce</Description>
+      <StaticWebAssetBasePath>App_Plugins/UmbracoCommerceOpayoPaymentProvider</StaticWebAssetBasePath>
     </PropertyGroup>
 
     <ItemGroup>
