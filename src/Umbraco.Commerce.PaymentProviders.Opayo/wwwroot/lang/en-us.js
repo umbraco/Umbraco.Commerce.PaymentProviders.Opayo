@@ -1,5 +1,5 @@
 export default {
-    paymentProviders: {
+    ucPaymentProviders: {
         'opayoServerLabel': 'Opayo Server',
         'opayoServerDescription': 'Opayo Server payment provider',
         'opayoServerSettingsContinueUrlLabel': 'Continue URL',
@@ -16,25 +16,25 @@ export default {
         'opayoServerSettingsTxTypeDescription': 'Transaction Type: PAYMENT, DEFERRED, AUTHENTICATE',
 
         'opayoServerSettingsOrderPropertyBillingLastNameLabel': 'Order property alias: Billing Last Name',
-        'opayoServerSettingsOrderPropertyBillingLastNameDescription': 'Order property alias containing the billing last name',
+        'opayoServerSettingsOrderPropertyBillingLastNameDescription': '[Required] Order property alias containing the billing last name',
 
         'opayoServerSettingsOrderPropertyBillingFirstNameLabel': 'Order property alias: Billing First Name',
-        'opayoServerSettingsOrderPropertyBillingFirstNameDescription': 'Order property alias containing the billing first name',
+        'opayoServerSettingsOrderPropertyBillingFirstNameDescription': '[Required] Order property alias containing the billing first name',
 
         'opayoServerSettingsOrderPropertyBillingAddress1Label': 'Order property alias: Billing Address 1',
-        'opayoServerSettingsOrderPropertyBillingAddress1Description': 'Order property alias containing the billing address 1',
+        'opayoServerSettingsOrderPropertyBillingAddress1Description': '[Required] Order property alias containing the billing address 1',
 
         'opayoServerSettingsOrderPropertyBillingAddress2Label': 'Order property alias: Billing Address 2',
         'opayoServerSettingsOrderPropertyBillingAddress2Description': 'Order property alias containing the billing address 2',
 
         'opayoServerSettingsOrderPropertyBillingCityLabel': 'Order property alias: Billing City',
-        'opayoServerSettingsOrderPropertyBillingCityDescription': 'Order property alias containing the billing city',
+        'opayoServerSettingsOrderPropertyBillingCityDescription': '[Required] Order property alias containing the billing city',
 
         'opayoServerSettingsOrderPropertyBillingCountyLabel': 'Order property alias: Billing County/State',
         'opayoServerSettingsOrderPropertyBillingCountyDescription': 'Order property alias containing the billing county/state',
 
         'opayoServerSettingsOrderPropertyBillingPostcodeLabel': 'Order property alias: Billing Postcode',
-        'opayoServerSettingsOrderPropertyBillingPostcodeDescription': 'Order property alias containing the billing postcode',
+        'opayoServerSettingsOrderPropertyBillingPostcodeDescription': '[Required] Order property alias containing the billing postcode',
 
         'opayoServerSettingsOrderPropertyShippingLastNameLabel': 'Order property alias: Shipping LastName',
         'opayoServerSettingsOrderPropertyShippingLastNameDescription': 'Order property alias containing the shipping last name',

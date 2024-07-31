@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Umbraco.Commerce.Common.Logging;
 using Umbraco.Commerce.Core.Api;
 using Umbraco.Commerce.Core.PaymentProviders;
+using Umbraco.Commerce.Extensions;
 using Umbraco.Commerce.PaymentProviders.Opayo.Api;
 using Umbraco.Commerce.PaymentProviders.Opayo.Api.Models;
-using Umbraco.Commerce.Common.Logging;
-using System.Threading.Tasks;
-using Umbraco.Commerce.Extensions;
-using System.Threading;
 
 namespace Umbraco.Commerce.PaymentProviders.Opayo
 {
@@ -57,8 +57,8 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
                 ProviderAlias = Alias
             });
 
-            var inputFields = OpayoInputLoader.LoadInputs(ctx.Order, ctx.Settings, Context, ctx.Urls.CallbackUrl);
-            var responseDetails = await client.InitiateTransactionAsync(ctx.Settings.TestMode, inputFields, cancellationToken).ConfigureAwait(false);
+            Dictionary<string, string> inputFields = OpayoInputLoader.LoadInputs(ctx.Order, ctx.Settings, Context, ctx.Urls.CallbackUrl);
+            Dictionary<string, string> responseDetails = await client.InitiateTransactionAsync(ctx.Settings.TestMode, inputFields, cancellationToken).ConfigureAwait(false);
 
             var status = responseDetails[OpayoConstants.Response.Status];
 
@@ -76,7 +76,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             }
             else
             {
-                _logger.Warn("Opayo (" + ctx.Order.OrderNumber + ") - Generate html form error - status: " + status + " | status details: " + responseDetails["StatusDetail"]);
+                _logger.Error("Opayo (" + ctx.Order.OrderNumber + ") - Generate html form error - status: " + status + " | status details: " + responseDetails["StatusDetail"]);
             }
 
             return new PaymentFormResult()
@@ -88,10 +88,11 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
 
         public override async Task<CallbackResult> ProcessCallbackAsync(PaymentProviderContext<OpayoSettings> ctx, CancellationToken cancellationToken = default)
         {
-            var callbackRequestModel = await CallbackRequestModel.FromRequestAsync(ctx.HttpContext.Request).ConfigureAwait(false);
+            CallbackRequestModel callbackRequestModel = await CallbackRequestModel.FromRequestAsync(ctx.HttpContext.Request).ConfigureAwait(false);
             var client = new OpayoServerClient(
-                _logger, 
-                new OpayoServerClientConfig {
+                _logger,
+                new OpayoServerClientConfig
+                {
                     ProviderAlias = Alias,
                     ContinueUrl = ctx.Urls.ContinueUrl,
                     CancelUrl = ctx.Urls.CancelUrl,
