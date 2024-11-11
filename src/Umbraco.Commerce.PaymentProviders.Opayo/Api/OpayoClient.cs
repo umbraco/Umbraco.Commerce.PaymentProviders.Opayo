@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Flurl.Http;
 using Flurl.Http.Newtonsoft;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Umbraco.Commerce.Common.Logging;
 using Umbraco.Commerce.Core.Models;
@@ -120,8 +121,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                         PaymentStatus = request.TxType == "PAYMENT" ? PaymentStatus.Captured : PaymentStatus.Authorized
                     }
                     : null,
-                HttpResponse = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                ActionResult = new ContentResult
                 {
+                    StatusCode = 200,
                     Content = validSig
                         ? GenerateOkCallbackResponseBody()
                         : GenerateInvalidCallbackResponseBody()
@@ -144,8 +146,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
 
             return new CallbackResult
             {
-                HttpResponse = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                ActionResult = new ContentResult
                 {
+                    StatusCode = 200,
                     Content = validSig
                         ? GenerateOkCallbackResponseBody()
                         : GenerateInvalidCallbackResponseBody()
@@ -177,8 +180,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                         PaymentStatus = PaymentStatus.Error
                     }
                     : null,
-                HttpResponse = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                ActionResult = new ContentResult
                 {
+                    StatusCode = 200,
                     Content = validSig
                         ? GenerateRejectedCallbackResponseBody()
                         : GenerateInvalidCallbackResponseBody()
@@ -210,8 +214,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                         PaymentStatus = PaymentStatus.PendingExternalSystem
                     }
                     : null,
-                HttpResponse = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                ActionResult = new ContentResult
                 {
+                    StatusCode = 200,
                     Content = validSig
                         ? GenerateOkCallbackResponseBody()
                         : GenerateInvalidCallbackResponseBody()
@@ -227,8 +232,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
 
             return new CallbackResult
             {
-                HttpResponse = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                ActionResult = new ContentResult
                 {
+                    StatusCode = 200,
                     Content = validSig
                         ? GenerateAbortCallbackResponseBody()
                         : GenerateInvalidCallbackResponseBody()
@@ -244,8 +250,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
 
             return new CallbackResult
             {
-                HttpResponse = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                ActionResult = new ContentResult
                 {
+                    StatusCode = 200,
                     Content = validSig
                         ? GenerateRejectedCallbackResponseBody()
                         : GenerateInvalidCallbackResponseBody()
@@ -261,8 +268,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
 
             return new CallbackResult
             {
-                HttpResponse = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                ActionResult = new ContentResult
                 {
+                    StatusCode = 200,
                     Content = validSig
                         ? GenerateRejectedCallbackResponseBody()
                         : GenerateInvalidCallbackResponseBody()
@@ -301,36 +309,36 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
             return callbackRequest.VPSSignature == calcedMd5Hash;
         }
 
-        private HttpContent GenerateOkCallbackResponseBody()
+        private string GenerateOkCallbackResponseBody()
         {
             var responseBody = new StringBuilder();
             responseBody.AppendLine($"{OpayoConstants.Response.Status}={OpayoConstants.Response.StatusCodes.Ok}");
             responseBody.AppendLine($"{OpayoConstants.Response.RedirectUrl}={_config.ContinueUrl}");
-            return new StringContent(responseBody.ToString());
+            return responseBody.ToString();
         }
 
-        private HttpContent GenerateAbortCallbackResponseBody()
+        private string GenerateAbortCallbackResponseBody()
         {
             var responseBody = new StringBuilder();
             responseBody.AppendLine($"{OpayoConstants.Response.Status}={OpayoConstants.Response.StatusCodes.Ok}");
             responseBody.AppendLine($"{OpayoConstants.Response.RedirectUrl}={_config.CancelUrl}");
-            return new StringContent(responseBody.ToString());
+            return responseBody.ToString();
         }
 
-        private HttpContent GenerateRejectedCallbackResponseBody()
+        private string GenerateRejectedCallbackResponseBody()
         {
             var responseBody = new StringBuilder();
             responseBody.AppendLine($"{OpayoConstants.Response.Status}={OpayoConstants.Response.StatusCodes.Ok}");
             responseBody.AppendLine($"{OpayoConstants.Response.RedirectUrl}={_config.ErrorUrl}");
-            return new StringContent(responseBody.ToString());
+            return responseBody.ToString();
         }
 
-        private HttpContent GenerateInvalidCallbackResponseBody()
+        private string GenerateInvalidCallbackResponseBody()
         {
             var responseBody = new StringBuilder();
             responseBody.AppendLine($"{OpayoConstants.Response.Status}={OpayoConstants.Response.StatusCodes.Error}");
             responseBody.AppendLine($"{OpayoConstants.Response.RedirectUrl}={_config.ErrorUrl}");
-            return new StringContent(responseBody.ToString());
+            return responseBody.ToString();
         }
 
     }

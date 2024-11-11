@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading.Tasks;
 using Umbraco.Commerce.Core.Api;
 using Umbraco.Commerce.Core.Models;
 using Umbraco.Commerce.Extensions;
@@ -9,17 +10,17 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
 {
     public static class OpayoInputLoader
     {
-        public static Dictionary<string, string> LoadInputs(OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context, string callbackUrl)
+        public static async Task<Dictionary<string, string>> LoadInputsAsync(OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context, string callbackUrl)
         {
             var inputFields = new Dictionary<string, string>();
 
-            LoadBasicSettings(inputFields, settings, callbackUrl);
-            LoadOrderValues(inputFields, order, settings, context);
+            await LoadBasicSettingsAsync(inputFields, settings, callbackUrl);
+            await LoadOrderValuesAsync(inputFields, order, settings, context);
 
             return inputFields;
         }
 
-        private static void LoadBasicSettings(Dictionary<string, string> inputFields, OpayoSettings settings, string callbackUrl)
+        private static async Task LoadBasicSettingsAsync(Dictionary<string, string> inputFields, OpayoSettings settings, string callbackUrl)
         {
             settings.VendorName.MustNotBeNullOrWhiteSpace(nameof(settings.VendorName));
             inputFields.Add(OpayoConstants.TransactionRequestFields.VpsProtocol, OpayoSettings.Defaults.VPSProtocol);
@@ -28,12 +29,12 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             inputFields.Add(OpayoConstants.TransactionRequestFields.NotificationURL, callbackUrl);
         }
 
-        private static void LoadOrderValues(Dictionary<string, string> inputFields, OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context)
+        private static async Task LoadOrderValuesAsync(Dictionary<string, string> inputFields, OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context)
         {
 
             inputFields.Add(OpayoConstants.TransactionRequestFields.VendorTxCode, order.OrderNumber);
 
-            CurrencyReadOnly currency = context.Services.CurrencyService.GetCurrency(order.CurrencyId);
+            CurrencyReadOnly currency = await context.Services.CurrencyService.GetCurrencyAsync(order.CurrencyId);
             string currencyCode = currency.Code.ToUpperInvariant();
 
             // Ensure currency has valid ISO 4217 code
@@ -56,8 +57,8 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             }
             inputFields.Add(OpayoConstants.TransactionRequestFields.Description, description);
 
-            LoadBillingDetails(inputFields, order, settings, context);
-            LoadShippingDetails(inputFields, order, settings, context);
+            await LoadBillingDetailsAsync(inputFields, order, settings, context);
+            await LoadShippingDetailsAsync(inputFields, order, settings, context);
 
             if (settings.DisplayOrderLines)
             {
@@ -92,7 +93,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             return !string.IsNullOrWhiteSpace(itemDescription) ? itemDescription : defaultItemDescription;
         }
 
-        private static void LoadBillingDetails(Dictionary<string, string> inputFields, OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context)
+        private static async Task LoadBillingDetailsAsync(Dictionary<string, string> inputFields, OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context)
         {
             string tempStore;
             settings.OrderPropertyBillingLastName.MustNotBeNullOrWhiteSpace(nameof(settings.OrderPropertyBillingLastName));
@@ -150,7 +151,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             inputFields.Add(OpayoConstants.TransactionRequestFields.Billing.PostCode, tempStore.Truncate(10));
 
             CountryReadOnly billingCountry = (order.PaymentInfo.CountryId.HasValue
-                ? context.Services.CountryService.GetCountry(order.PaymentInfo.CountryId.Value)
+                ? await context.Services.CountryService.GetCountryAsync(order.PaymentInfo.CountryId.Value)
                 : null) ?? throw new InvalidOperationException("Billing country must be provided");
 
             inputFields.Add(OpayoConstants.TransactionRequestFields.Billing.Country, billingCountry.Code);
@@ -167,7 +168,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             }
         }
 
-        private static void LoadShippingDetails(Dictionary<string, string> inputFields, OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context)
+        private static async Task LoadShippingDetailsAsync(Dictionary<string, string> inputFields, OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context)
         {
             string tempStore;
             settings.OrderPropertyShippingLastName.MustNotBeNullOrWhiteSpace(nameof(settings.OrderPropertyShippingLastName));
@@ -225,7 +226,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             inputFields.Add(OpayoConstants.TransactionRequestFields.Delivery.PostCode, tempStore.Truncate(10));
 
             CountryReadOnly shippingCountry = (order.ShippingInfo.CountryId.HasValue
-                ? context.Services.CountryService.GetCountry(order.ShippingInfo.CountryId.Value)
+                ? await context.Services.CountryService.GetCountryAsync(order.ShippingInfo.CountryId.Value)
                 : null) ?? throw new InvalidOperationException("Shipping country must be provided");
 
             inputFields.Add(OpayoConstants.TransactionRequestFields.Delivery.Country, shippingCountry.Code);
