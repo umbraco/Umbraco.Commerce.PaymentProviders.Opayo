@@ -8,7 +8,6 @@
 
     <ItemGroup>
       <PackageReference Include="Flurl.Http" />
-      <PackageReference Include="Flurl.Http.Newtonsoft" />
       <PackageReference Include="Umbraco.Commerce.Core" />
     </ItemGroup>
 

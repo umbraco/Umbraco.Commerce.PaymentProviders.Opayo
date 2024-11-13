@@ -1,19 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Flurl.Http;
-using Flurl.Http.Newtonsoft;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Umbraco.Commerce.Common.Logging;
 using Umbraco.Commerce.Core.Models;
 using Umbraco.Commerce.Core.PaymentProviders;
-using Umbraco.Commerce.Extensions;
 using Umbraco.Commerce.PaymentProviders.Opayo.Api.Models;
 
 namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
@@ -79,9 +77,10 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                 }
 
                 var request = new FlurlRequest(url)
-                    .WithSettings(x => x.JsonSerializer = new NewtonsoftJsonSerializer(new JsonSerializerSettings
+                    .WithSettings(x => x.JsonSerializer = new CustomFlurlJsonSerializer(new JsonSerializerOptions
                     {
-                        NullValueHandling = NullValueHandling.Ignore
+                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                        PreferredObjectCreationHandling = JsonObjectCreationHandling.Replace,
                     }))
                     .SetQueryParams(inputFields, Flurl.NullValueHandling.Remove);
 
