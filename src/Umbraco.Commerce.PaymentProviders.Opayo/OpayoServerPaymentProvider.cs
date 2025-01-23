@@ -57,7 +57,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
                 ProviderAlias = Alias
             });
 
-            Dictionary<string, string> inputFields = OpayoInputLoader.LoadInputs(ctx.Order, ctx.Settings, Context, ctx.Urls.CallbackUrl);
+            Dictionary<string, string> inputFields = await OpayoInputLoader.LoadInputsAsync(ctx.Order, ctx.Settings, Context, ctx.Urls.CallbackUrl);
             Dictionary<string, string> responseDetails = await client.InitiateTransactionAsync(ctx.Settings.TestMode, inputFields, cancellationToken).ConfigureAwait(false);
 
             var status = responseDetails[OpayoConstants.Response.Status];
