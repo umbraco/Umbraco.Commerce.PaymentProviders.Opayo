@@ -11,12 +11,15 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             public static string TxType = "PAYMENT";
         }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 500)]
         public string ContinueUrl { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 500)]
         public string CancelUrl { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 500)]
         public string ErrorUrl { get; set; }
 
