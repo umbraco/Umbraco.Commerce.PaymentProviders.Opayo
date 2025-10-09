@@ -55,24 +55,29 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         [PaymentProviderSetting(SortOrder = 106)]
         public string OrderPropertyBillingPostcode { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 200)]
         public string OrderPropertyShippingLastName { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 201)]
         public string OrderPropertyShippingFirstName { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 202)]
         public string OrderPropertyShippingAddress1 { get; set; }
 
         [PaymentProviderSetting(SortOrder = 203)]
         public string OrderPropertyShippingAddress2 { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 204)]
         public string OrderPropertyShippingCity { get; set; }
 
         [PaymentProviderSetting(SortOrder = 205)]
         public string OrderPropertyShippingCounty { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 206)]
         public string OrderPropertyShippingPostcode { get; set; }
 
