@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Umbraco.Commerce.Core.PaymentProviders;
 
 namespace Umbraco.Commerce.PaymentProviders.Opayo
@@ -12,8 +13,10 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
 
         [PaymentProviderSetting(SortOrder = 500)]
         public string ContinueUrl { get; set; }
+
         [PaymentProviderSetting(SortOrder = 500)]
         public string CancelUrl { get; set; }
+
         [PaymentProviderSetting(SortOrder = 500)]
         public string ErrorUrl { get; set; }
 
@@ -23,23 +26,29 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         [PaymentProviderSetting(IsAdvanced = true, SortOrder = 1000)]
         public string TxType { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 100)]
         public string OrderPropertyBillingLastName { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 101)]
         public string OrderPropertyBillingFirstName { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 102)]
         public string OrderPropertyBillingAddress1 { get; set; }
 
         [PaymentProviderSetting(SortOrder = 103)]
         public string OrderPropertyBillingAddress2 { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 104)]
         public string OrderPropertyBillingCity { get; set; }
+
         [PaymentProviderSetting(SortOrder = 105)]
         public string OrderPropertyBillingCounty { get; set; }
 
+        [Required]
         [PaymentProviderSetting(SortOrder = 106)]
         public string OrderPropertyBillingPostcode { get; set; }
 
