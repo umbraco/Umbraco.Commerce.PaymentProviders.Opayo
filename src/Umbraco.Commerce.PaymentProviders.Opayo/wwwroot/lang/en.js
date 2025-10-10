@@ -21,6 +21,9 @@ export default {
         'opayoServerSettingsOrderPropertyBillingFirstNameLabel': 'Order property alias: Billing First Name',
         'opayoServerSettingsOrderPropertyBillingFirstNameDescription': '[Required] Order property alias containing the billing first name',
 
+        'opayoServerSettingsOrderPropertyCustomerEmailLabel': 'Order property alias: Customer Email',
+        'opayoServerSettingsOrderPropertyCustomerEmailDescription': 'Order property alias containing the customer email',
+
         'opayoServerSettingsOrderPropertyBillingAddress1Label': 'Order property alias: Billing Address 1',
         'opayoServerSettingsOrderPropertyBillingAddress1Description': '[Required] Order property alias containing the billing address 1',
 

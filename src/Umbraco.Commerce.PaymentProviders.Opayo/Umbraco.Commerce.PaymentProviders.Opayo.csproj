@@ -1,14 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-    <PropertyGroup>
-      <Title>Umbraco Commerce Opayo Payment Provider</Title>
-      <Description>Opayo payment provider for Umbraco Commerce</Description>
-      <StaticWebAssetBasePath>App_Plugins/UmbracoCommerceOpayoPaymentProvider</StaticWebAssetBasePath>
-    </PropertyGroup>
+  <PropertyGroup>
+    <Title>Umbraco Commerce Opayo Payment Provider</Title>
+    <Description>Opayo payment provider for Umbraco Commerce</Description>
+    <StaticWebAssetBasePath>App_Plugins/UmbracoCommerceOpayoPaymentProvider</StaticWebAssetBasePath>
+    <NoWarn>CA2007;</NoWarn>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Flurl.Http" />
-      <PackageReference Include="Umbraco.Commerce.Core" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Flurl.Http" />
+    <PackageReference Include="Umbraco.Commerce.Core" />
+  </ItemGroup>
 
 </Project>
