@@ -29,6 +29,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         [PaymentProviderSetting(SortOrder = 101)]
         public string OrderPropertyBillingFirstName { get; set; }
 
+        [PaymentProviderSetting(SortOrder = 101)]
+        public string OrderPropertyCustomerEmail { get; set; }
+
         [PaymentProviderSetting(SortOrder = 102)]
         public string OrderPropertyBillingAddress1 { get; set; }
 

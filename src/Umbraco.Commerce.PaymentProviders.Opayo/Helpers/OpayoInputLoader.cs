@@ -24,14 +24,15 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         {
             settings.VendorName.MustNotBeNullOrWhiteSpace(nameof(settings.VendorName));
             inputFields.Add(OpayoConstants.TransactionRequestFields.VpsProtocol, OpayoSettings.Defaults.VPSProtocol);
-            inputFields.Add(OpayoConstants.TransactionRequestFields.TransactionType, (string.IsNullOrWhiteSpace(settings.TxType) ? OpayoSettings.Defaults.TxType : settings.TxType).ToUpper(CultureInfo.CurrentCulture));
+            inputFields.Add(
+                OpayoConstants.TransactionRequestFields.TransactionType,
+                (string.IsNullOrWhiteSpace(settings.TxType) ? OpayoSettings.Defaults.TxType : settings.TxType).ToUpperInvariant());
             inputFields.Add(OpayoConstants.TransactionRequestFields.Vendor, settings.VendorName);
             inputFields.Add(OpayoConstants.TransactionRequestFields.NotificationURL, callbackUrl);
         }
 
         private static async Task LoadOrderValuesAsync(Dictionary<string, string> inputFields, OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context)
         {
-
             inputFields.Add(OpayoConstants.TransactionRequestFields.VendorTxCode, order.OrderNumber);
 
             CurrencyReadOnly currency = await context.Services.CurrencyService.GetCurrencyAsync(order.CurrencyId);
@@ -114,6 +115,15 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
 
             inputFields.Add(OpayoConstants.TransactionRequestFields.Billing.Firstnames, tempStore.Truncate(20));
 
+            if (!string.IsNullOrWhiteSpace(settings.OrderPropertyCustomerEmail))
+            {
+                tempStore = order.Properties[settings.OrderPropertyCustomerEmail];
+                if (!string.IsNullOrWhiteSpace(tempStore))
+                {
+                    inputFields.Add(OpayoConstants.TransactionRequestFields.Billing.CustomerEmail, tempStore);
+                }
+            }
+
             settings.OrderPropertyBillingAddress1.MustNotBeNullOrWhiteSpace(nameof(settings.OrderPropertyBillingAddress1));
             tempStore = order.Properties[settings.OrderPropertyBillingAddress1];
             if (string.IsNullOrWhiteSpace(tempStore))
@@ -133,10 +143,10 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             }
 
             settings.OrderPropertyBillingCity.MustNotBeNullOrWhiteSpace(nameof(settings.OrderPropertyBillingCity));
-            tempStore = order.Properties[settings.OrderPropertyBillingPostcode];
+            tempStore = order.Properties[settings.OrderPropertyBillingCity];
             if (string.IsNullOrWhiteSpace(tempStore))
             {
-                throw new InvalidOperationException("Unable to get billing city from order");
+                throw new InvalidOperationException("Billing city must be provided");
             }
 
             inputFields.Add(OpayoConstants.TransactionRequestFields.Billing.City, tempStore.Truncate(40));
@@ -145,7 +155,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             tempStore = order.Properties[settings.OrderPropertyBillingPostcode];
             if (string.IsNullOrWhiteSpace(tempStore))
             {
-                throw new InvalidOperationException("Unable to get billing postcode from order");
+                throw new InvalidOperationException("Billing postcode must be provided");
             }
 
             inputFields.Add(OpayoConstants.TransactionRequestFields.Billing.PostCode, tempStore.Truncate(10));
@@ -161,7 +171,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
                 tempStore = order.Properties[settings.OrderPropertyBillingCounty];
                 if (string.IsNullOrWhiteSpace(tempStore))
                 {
-                    throw new InvalidOperationException("Billing State must be provided for the US");
+                    throw new InvalidOperationException("Billing state must be provided for the US");
                 }
 
                 inputFields.Add(OpayoConstants.TransactionRequestFields.Billing.State, tempStore);
@@ -175,7 +185,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             tempStore = order.Properties[settings.OrderPropertyShippingLastName];
             if (string.IsNullOrWhiteSpace(tempStore))
             {
-                throw new InvalidOperationException("Shiping last name must be provided");
+                throw new InvalidOperationException("Shipping last name must be provided");
             }
 
             inputFields.Add(OpayoConstants.TransactionRequestFields.Delivery.Surname, tempStore.Truncate(20));
@@ -184,7 +194,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             tempStore = order.Properties[settings.OrderPropertyShippingFirstName];
             if (string.IsNullOrWhiteSpace(tempStore))
             {
-                throw new InvalidOperationException("Delviery forenames must be provided");
+                throw new InvalidOperationException("Delivery forenames must be provided");
             }
 
             inputFields.Add(OpayoConstants.TransactionRequestFields.Delivery.Firstnames, tempStore.Truncate(20));
@@ -236,14 +246,11 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
                 tempStore = order.Properties[settings.OrderPropertyShippingCounty];
                 if (string.IsNullOrWhiteSpace(tempStore))
                 {
-                    throw new InvalidOperationException("Shipping State must be provided for the US");
+                    throw new InvalidOperationException("Shipping state must be provided for the US");
                 }
 
                 inputFields.Add(OpayoConstants.TransactionRequestFields.Delivery.State, tempStore);
             }
         }
-
-
-
     }
 }
