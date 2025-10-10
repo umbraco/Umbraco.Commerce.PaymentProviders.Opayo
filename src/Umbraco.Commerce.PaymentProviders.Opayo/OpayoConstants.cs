@@ -1,4 +1,4 @@
-﻿namespace Umbraco.Commerce.PaymentProviders.Opayo
+namespace Umbraco.Commerce.PaymentProviders.Opayo
 {
     public static class OpayoConstants
     {
@@ -17,6 +17,7 @@
             {
                 public const string Surname = "BillingSurname";
                 public const string Firstnames = "BillingFirstnames";
+                public const string CustomerEmail = "CustomerEmail";
                 public const string Address1 = "BillingAddress1";
                 public const string Address2 = "BillingAddress2";
                 public const string City = "BillingCity";
