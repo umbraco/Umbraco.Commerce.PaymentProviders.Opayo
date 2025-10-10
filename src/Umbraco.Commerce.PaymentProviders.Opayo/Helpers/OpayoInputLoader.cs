@@ -23,14 +23,13 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         {
             settings.VendorName.MustNotBeNullOrWhiteSpace(nameof(settings.VendorName));
             inputFields.Add(OpayoConstants.TransactionRequestFields.VpsProtocol, OpayoSettings.Defaults.VPSProtocol);
-            inputFields.Add(OpayoConstants.TransactionRequestFields.TransactionType, (string.IsNullOrWhiteSpace(settings.TxType) ? OpayoSettings.Defaults.TxType : settings.TxType).ToUpper());
+            inputFields.Add(OpayoConstants.TransactionRequestFields.TransactionType, (string.IsNullOrWhiteSpace(settings.TxType) ? OpayoSettings.Defaults.TxType : settings.TxType).ToUpperInvariant());
             inputFields.Add(OpayoConstants.TransactionRequestFields.Vendor, settings.VendorName);
             inputFields.Add(OpayoConstants.TransactionRequestFields.NotificationURL, callbackUrl);
         }
 
         private static void LoadOrderValues(Dictionary<string, string> inputFields, OrderReadOnly order, OpayoSettings settings, UmbracoCommerceContext context)
         {
-
             inputFields.Add(OpayoConstants.TransactionRequestFields.VendorTxCode, order.OrderNumber);
 
             var currency = context.Services.CurrencyService.GetCurrency(order.CurrencyId);
@@ -51,7 +50,6 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
                     description = tempStore.Value.Truncate(100);
             }
             inputFields.Add(OpayoConstants.TransactionRequestFields.Description, description);
-            
 
             LoadBillingDetails(inputFields, order, settings, context);
             LoadShippingDetails(inputFields, order, settings, context);
@@ -64,7 +62,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         private static void LoadOrderLines(Dictionary<string, string> inputFields, OrderReadOnly order, OpayoSettings settings)
         {
             var orderLines = new List<string>();
-            foreach(var item in order.OrderLines)
+            foreach (var item in order.OrderLines)
             {
                 var itemDescription = GetItemDescriptionByOrderPropertyDescriptionAlias(item, settings.OrderLinePropertyDescription);
                 orderLines.Add($"{itemDescription}:{item.Quantity}:{item.UnitPrice.Value.WithoutTax:0.00}:{item.UnitPrice.Value.Tax:0.00}:{item.UnitPrice.Value.WithTax:0.00}:{item.TotalPrice.Value.WithTax:0.00}");
@@ -79,7 +77,8 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         {
             var defaultItemDescription = $"{lineItem.Name} ({lineItem.Sku})";
 
-            if (string.IsNullOrEmpty(alias)) return defaultItemDescription;
+            if (string.IsNullOrEmpty(alias))
+                return defaultItemDescription;
 
             var itemDescription = lineItem.Properties[alias];
             return !string.IsNullOrWhiteSpace(itemDescription) ? itemDescription : defaultItemDescription;
@@ -99,6 +98,15 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             if (string.IsNullOrWhiteSpace(tempStore))
                 throw new ArgumentNullException(nameof(settings.OrderPropertyBillingFirstName), "Billing forenames must be provided");
             inputFields.Add(OpayoConstants.TransactionRequestFields.Billing.Firstnames, tempStore.Truncate(20));
+
+            if (!string.IsNullOrWhiteSpace(settings.OrderPropertyCustomerEmail))
+            {
+                tempStore = order.Properties[settings.OrderPropertyCustomerEmail];
+                if (!string.IsNullOrWhiteSpace(tempStore))
+                {
+                    inputFields.Add(OpayoConstants.TransactionRequestFields.Billing.CustomerEmail, tempStore);
+                }
+            }
 
             settings.OrderPropertyBillingAddress1.MustNotBeNullOrWhiteSpace(nameof(settings.OrderPropertyBillingAddress1));
             tempStore = order.Properties[settings.OrderPropertyBillingAddress1];
@@ -200,8 +208,5 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
                 inputFields.Add(OpayoConstants.TransactionRequestFields.Delivery.State, tempStore);
             }
         }
-
-
-
     }
 }

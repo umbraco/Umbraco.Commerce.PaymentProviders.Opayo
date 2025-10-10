@@ -20,7 +20,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         [PaymentProviderSetting(Name = "Vendor Name", Description = "Your unique identifier, assigned to you by Opayo during sign up", SortOrder = 1)]
         public string VendorName { get; set; }
 
-        [PaymentProviderSetting(Name ="Transaction Type", IsAdvanced =true, Description ="Transaction Type: PAYMENT, DEFERRED, AUTHENTICATE", SortOrder = 1000)]
+        [PaymentProviderSetting(Name = "Transaction Type", IsAdvanced = true, Description = "Transaction Type: PAYMENT, DEFERRED, AUTHENTICATE", SortOrder = 1000)]
         public string TxType { get; set; }
 
         [PaymentProviderSetting(Name = "Order property alias: Billing Last Name", Description = "Order property alias containing the billing last name", SortOrder = 100)]
@@ -28,6 +28,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
 
         [PaymentProviderSetting(Name = "Order property alias: Billing First Name", Description = "Order property alias containing the billing first name", SortOrder = 101)]
         public string OrderPropertyBillingFirstName { get; set; }
+
+        [PaymentProviderSetting(Name = "Order property alias: Customer Email", Description = "Order property alias containing the customer email address", SortOrder = 101)]
+        public string OrderPropertyCustomerEmail { get; set; }
 
         [PaymentProviderSetting(Name = "Order property alias: Billing Address 1", Description = "Order property alias containing the billing address 1", SortOrder = 102)]
         public string OrderPropertyBillingAddress1 { get; set; }
@@ -66,10 +69,10 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
         [PaymentProviderSetting(Name = "Order property alias: Shipping Postcode", Description = "Order property alias containing the shipping postcode", SortOrder = 206)]
         public string OrderPropertyShippingPostcode { get; set; }
 
-        [PaymentProviderSetting(Name = "Display order lines on Opayo", Description ="Send the order line details to be shown on the payment providers final stage", SortOrder = 5)]
+        [PaymentProviderSetting(Name = "Display order lines on Opayo", Description = "Send the order line details to be shown on the payment providers final stage", SortOrder = 5)]
         public bool DisplayOrderLines { get; set; }
 
-        [PaymentProviderSetting(Name = "Order line property alias: Description", Description ="Order line property alias containing the description of the order line item to send to Opayo (if left blank, this defaults to Product Name (Product SKU)", SortOrder = 6)]
+        [PaymentProviderSetting(Name = "Order line property alias: Description", Description = "Order line property alias containing the description of the order line item to send to Opayo (if left blank, this defaults to Product Name (Product SKU)", SortOrder = 6)]
         public string OrderLinePropertyDescription { get; set; }
 
         [PaymentProviderSetting(Name = "Order property alias: Description", Description = "Order property alias containing the description to send to Opayo", SortOrder = 2)]
