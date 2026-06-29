@@ -11,6 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Flurl.Http" Version="[4.0.2, 4.999.999)" />
-    <PackageVersion Include="Umbraco.Commerce.Core" Version="[17.0.0, 17.999.999)" />
+    <PackageVersion Include="Umbraco.Commerce.Core" Version="[18.0.0, 18.999.999)" />
   </ItemGroup>
 </Project>
