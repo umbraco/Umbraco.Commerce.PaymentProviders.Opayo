@@ -85,6 +85,9 @@ public class OpayoCallbackTests
         CallbackRequestModel model = await ParseAsync(NotificationForm());
 
         Assert.Equal(ExpectedSignature(model), OpayoServerClient.ComputeVpsSignature(model, VendorName, SecurityKey));
+
+        // Fixed value, so a field order change in both places still fails.
+        Assert.Equal("6B2937E40D809544B9D3D2FACD1ED44B", OpayoServerClient.ComputeVpsSignature(model, VendorName, SecurityKey));
     }
 
     [Fact]
