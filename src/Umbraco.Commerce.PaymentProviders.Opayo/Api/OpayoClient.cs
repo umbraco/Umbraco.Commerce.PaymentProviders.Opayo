@@ -94,7 +94,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
             }
         }
 
-        private Dictionary<string, string> GetFields(string response)
+        internal static Dictionary<string, string> GetFields(string response)
         {
             return response.Split(
                 Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
@@ -278,6 +278,16 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         }
 
         private bool ValidateVpsSigniture(OrderReadOnly order, CallbackRequestModel callbackRequest, OpayoSettings settings)
+            => IsValidVpsSignature(callbackRequest, settings.VendorName, order.Properties[OpayoConstants.OrderProperties.SecurityKey]?.Value);
+
+        /// <summary>
+        /// Checks the VPSSignature Opayo sends with a notification: an upper case MD5 of the
+        /// notification fields, the vendor name and the transaction's security key, in Opayo's order.
+        /// </summary>
+        internal static bool IsValidVpsSignature(CallbackRequestModel callbackRequest, string vendorName, string securityKey)
+            => callbackRequest.VPSSignature == ComputeVpsSignature(callbackRequest, vendorName, securityKey);
+
+        internal static string ComputeVpsSignature(CallbackRequestModel callbackRequest, string vendorName, string securityKey)
         {
             var md5Values = new List<string>
             {
@@ -285,9 +295,9 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                 callbackRequest.VendorTxCode,
                 callbackRequest.Status,
                 callbackRequest.TxAuthNo,
-                settings.VendorName.ToLowerInvariant(),
+                vendorName.ToLowerInvariant(),
                 callbackRequest.AVSCV2,
-                order.Properties[OpayoConstants.OrderProperties.SecurityKey]?.Value,
+                securityKey,
                 callbackRequest.AddressResult,
                 callbackRequest.PostCodeResult,
                 callbackRequest.CV2Result,
@@ -304,8 +314,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
                 callbackRequest.BankAuthCode
             };
 
-            string calcedMd5Hash = string.Join("", md5Values.Where(v => string.IsNullOrEmpty(v) == false)).ToMD5Hash().ToUpperInvariant();
-            return callbackRequest.VPSSignature == calcedMd5Hash;
+            return string.Join("", md5Values.Where(v => string.IsNullOrEmpty(v) == false)).ToMD5Hash().ToUpperInvariant();
         }
 
         private string GenerateOkCallbackResponseBody()
