@@ -23,7 +23,7 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
 
         public static string ToMD5Hash(this string input)
         {
-            return (new MD5CryptoServiceProvider()).ComputeHash(Encoding.UTF8.GetBytes(input)).ToHex();
+            return MD5.HashData(Encoding.UTF8.GetBytes(input)).ToHex();
         }
     }
 }
