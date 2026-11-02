@@ -60,11 +60,26 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             Dictionary<string, string> inputFields = await OpayoInputLoader.LoadInputsAsync(ctx.Order, ctx.Settings, Context, ctx.Urls.CallbackUrl);
             Dictionary<string, string> responseDetails = await client.InitiateTransactionAsync(ctx.Settings.TestMode, inputFields, cancellationToken).ConfigureAwait(false);
 
-            var status = responseDetails[OpayoConstants.Response.Status];
+            return CreateFormResult(responseDetails, form, ctx.Order.OrderNumber, _logger);
+        }
+
+        /// <summary>
+        /// Builds the payment form from Opayo's transaction registration response. If the registration
+        /// failed, or no response came back, the error is logged and the form posts to the cancel URL.
+        /// </summary>
+        internal static PaymentFormResult CreateFormResult(Dictionary<string, string> responseDetails, PaymentForm form, string orderNumber, ILogger<OpayoServerPaymentProvider> logger)
+        {
+            ArgumentNullException.ThrowIfNull(form);
+            ArgumentNullException.ThrowIfNull(logger);
 
             Dictionary<string, string> orderMetaData = null;
 
-            if (status == OpayoConstants.Response.StatusCodes.Ok || status == OpayoConstants.Response.StatusCodes.Repeated)
+            if (responseDetails == null || !responseDetails.TryGetValue(OpayoConstants.Response.Status, out var status))
+            {
+                // The request to Opayo failed (logged by the client) or Opayo sent back no status.
+                logger.Error("Opayo (" + orderNumber + ") - Generate html form error - no transaction registration response was received from Opayo");
+            }
+            else if (status == OpayoConstants.Response.StatusCodes.Ok || status == OpayoConstants.Response.StatusCodes.Repeated)
             {
                 orderMetaData = new Dictionary<string, string>
                 {
@@ -76,7 +91,8 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo
             }
             else
             {
-                _logger.Error("Opayo (" + ctx.Order.OrderNumber + ") - Generate html form error - status: " + status + " | status details: " + responseDetails["StatusDetail"]);
+                responseDetails.TryGetValue("StatusDetail", out var statusDetail);
+                logger.Error("Opayo (" + orderNumber + ") - Generate html form error - status: " + status + " | status details: " + statusDetail);
             }
 
             return new PaymentFormResult()
