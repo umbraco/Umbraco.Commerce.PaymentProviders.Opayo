@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Flurl.Http;
 using Microsoft.AspNetCore.Mvc;
 using Umbraco.Commerce.Common.Logging;
@@ -67,32 +67,39 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         {
             try
             {
-                string requestContents = string.Empty;
-
-                if (inputFields != null)
-                {
-                    requestContents = string.Join("&", (
-                        from i in inputFields
-                        select string.Format("{0}={1}", i.Key, HttpUtility.UrlEncode(i.Value))).ToArray<string>());
-                }
+                // Opayo Server takes the registration fields as a URL encoded form body.
+                var formFields = (inputFields ?? new Dictionary<string, string>())
+                    .Where(x => x.Value != null)
+                    .ToDictionary(x => x.Key, x => x.Value);
 
                 var request = new FlurlRequest(url)
                     .WithSettings(x => x.JsonSerializer = new CustomFlurlJsonSerializer(new JsonSerializerOptions
                     {
                         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                         PreferredObjectCreationHandling = JsonObjectCreationHandling.Replace,
-                    }))
-                    .SetQueryParams(inputFields, Flurl.NullValueHandling.Remove);
+                    }));
 
                 return await request
-                    .PostAsync(null, cancellationToken: cancellationToken)
+                    .PostUrlEncodedAsync(formFields, cancellationToken: cancellationToken)
                     .ReceiveString().ConfigureAwait(false);
             }
             catch (FlurlHttpException ex)
             {
+                // Logs the endpoint and status only: the request fields hold customer details.
+                _logger.Error(
+                    "Opayo request to {Endpoint} failed with status {StatusCode}: {ErrorType}",
+                    GetEndpointForLog(url),
+                    ex.StatusCode,
+                    ex.InnerException?.GetType().Name ?? ex.GetType().Name);
+
                 return string.Empty;
             }
         }
+
+        private static string GetEndpointForLog(string url)
+            => Uri.TryCreate(url, UriKind.Absolute, out Uri uri)
+                ? uri.GetLeftPart(UriPartial.Path)
+                : "(unknown)";
 
         internal static Dictionary<string, string> GetFields(string response)
         {
@@ -278,14 +285,48 @@ namespace Umbraco.Commerce.PaymentProviders.Opayo.Api
         }
 
         private bool ValidateVpsSigniture(OrderReadOnly order, CallbackRequestModel callbackRequest, OpayoSettings settings)
-            => IsValidVpsSignature(callbackRequest, settings.VendorName, order.Properties[OpayoConstants.OrderProperties.SecurityKey]?.Value);
+        {
+            string securityKey = order.Properties[OpayoConstants.OrderProperties.SecurityKey]?.Value;
+
+            if (string.IsNullOrEmpty(securityKey))
+            {
+                _logger.Warn(
+                    "Opayo notification for order {OrderNumber} refused: the order has no stored Opayo security key, so the signature can't be checked.\n\tOpayoTx: {VPSTxId}",
+                    order.OrderNumber ?? order.CartNumber,
+                    callbackRequest.VPSTxId);
+                return false;
+            }
+
+            if (!IsValidVpsSignature(callbackRequest, settings.VendorName, securityKey))
+            {
+                _logger.Warn(
+                    "Opayo notification for order {OrderNumber} refused: the VPSSignature doesn't match the notification (check the Vendor Name setting if this happens for every order).\n\tOpayoTx: {VPSTxId}",
+                    order.OrderNumber ?? order.CartNumber,
+                    callbackRequest.VPSTxId);
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Checks the VPSSignature Opayo sends with a notification: an upper case MD5 of the
         /// notification fields, the vendor name and the transaction's security key, in Opayo's order.
+        /// A transaction without a security key never validates.
         /// </summary>
         internal static bool IsValidVpsSignature(CallbackRequestModel callbackRequest, string vendorName, string securityKey)
-            => callbackRequest.VPSSignature == ComputeVpsSignature(callbackRequest, vendorName, securityKey);
+        {
+            if (string.IsNullOrEmpty(securityKey) || string.IsNullOrEmpty(callbackRequest.VPSSignature))
+            {
+                return false;
+            }
+
+            // Hex digest, so compare without regard to case, in constant time.
+            byte[] expected = Encoding.ASCII.GetBytes(ComputeVpsSignature(callbackRequest, vendorName, securityKey));
+            byte[] actual = Encoding.ASCII.GetBytes(callbackRequest.VPSSignature.Trim().ToUpperInvariant());
+
+            return CryptographicOperations.FixedTimeEquals(expected, actual);
+        }
 
         internal static string ComputeVpsSignature(CallbackRequestModel callbackRequest, string vendorName, string securityKey)
         {

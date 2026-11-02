@@ -45,14 +45,15 @@ public class OpayoCallbackTests
         return await CallbackRequestModel.FromRequestAsync(context.Request);
     }
 
-    private static string ExpectedSignature(CallbackRequestModel r)
+    private static string ExpectedSignature(CallbackRequestModel r, bool lowerCase = false)
     {
         // Opayo Server protocol 4.00: MD5 over these fields in this order, vendor name lower case, upper case hex.
         string raw = string.Concat(
             r.VPSTxId, r.VendorTxCode, r.Status, r.TxAuthNo, VendorName.ToLowerInvariant(), r.AVSCV2, SecurityKey,
             r.AddressResult, r.PostCodeResult, r.CV2Result, r.GiftAid, r.SecureStatus, r.CAVV, r.AddressStatus,
             r.PayerStatus, r.CardType, r.Last4Digits, r.DeclineCode, r.ExpiryDate, r.FraudResponse, r.BankAuthCode);
-        return Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(raw)));
+        byte[] hash = MD5.HashData(Encoding.UTF8.GetBytes(raw));
+        return lowerCase ? Convert.ToHexStringLower(hash) : Convert.ToHexString(hash);
     }
 
     [Fact]
@@ -123,6 +124,35 @@ public class OpayoCallbackTests
     public async Task Missing_Signature_Is_Rejected()
     {
         CallbackRequestModel model = await ParseAsync(NotificationForm());
+
+        Assert.False(OpayoServerClient.IsValidVpsSignature(model, VendorName, SecurityKey));
+    }
+
+    [Fact]
+    public async Task Missing_Security_Key_Is_Rejected()
+    {
+        // A signature built without any security key must not validate against an order that has none stored.
+        CallbackRequestModel model = await ParseAsync(NotificationForm());
+        model.VPSSignature = OpayoServerClient.ComputeVpsSignature(model, VendorName, null!);
+
+        Assert.False(OpayoServerClient.IsValidVpsSignature(model, VendorName, null!));
+        Assert.False(OpayoServerClient.IsValidVpsSignature(model, VendorName, string.Empty));
+    }
+
+    [Fact]
+    public async Task Lower_Case_Signature_Is_Accepted()
+    {
+        CallbackRequestModel model = await ParseAsync(NotificationForm());
+        model.VPSSignature = ExpectedSignature(model, lowerCase: true);
+
+        Assert.True(OpayoServerClient.IsValidVpsSignature(model, VendorName, SecurityKey));
+    }
+
+    [Fact]
+    public async Task Signature_Of_Different_Length_Is_Rejected()
+    {
+        CallbackRequestModel model = await ParseAsync(NotificationForm());
+        model.VPSSignature = ExpectedSignature(model) + "00";
 
         Assert.False(OpayoServerClient.IsValidVpsSignature(model, VendorName, SecurityKey));
     }
