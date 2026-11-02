@@ -30,7 +30,8 @@
   <!-- Package validation -->
   <PropertyGroup>
     <EnablePackageValidation>false</EnablePackageValidation>
-    <!--<PackageValidationBaselineVersion>18.0.0-rc1</PackageValidationBaselineVersion>-->
+    <!-- Re-enable with the 19.0.0 baseline once 19.0.0 is on NuGet -->
+    <!-- <PackageValidationBaselineVersion>19.0.0</PackageValidationBaselineVersion> -->
     <EnableStrictModeForCompatibleFrameworksInPackage>true</EnableStrictModeForCompatibleFrameworksInPackage>
     <EnableStrictModeForCompatibleTfms>true</EnableStrictModeForCompatibleTfms>
   </PropertyGroup>
